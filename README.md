@@ -1,2 +1,2 @@
 # disc_UNet
-MICCAI比赛baseline
+MICCAI比赛用baseline
