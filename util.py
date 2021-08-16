@@ -23,7 +23,7 @@ class DiceLoss(nn.Layer):
             and does not contribute to the input gradient. Default ``255``.
     """
 
-    def __init__(self, ignore_index=2):
+    def __init__(self, ignore_index=255):
         super(DiceLoss, self).__init__()
         self.ignore_index = ignore_index
         self.eps = 1e-5

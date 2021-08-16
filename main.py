@@ -6,9 +6,9 @@ import random
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics.pairwise import euclidean_distances 
-import matplotlib.pylab as plt
-
+from sklearn.metrics.pairwise import euclidean_distances
+from paddleseg.models.losses.dice_loss import DiceLoss as DiceLoss2
+from paddleseg.models.attention_unet import AttentionUNet
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
@@ -16,16 +16,18 @@ from paddle.io import Dataset
 from dataset import FundusDataset
 from model import cup_disc_UNet
 from util import DiceLoss
+import warnings
+warnings.filterwarnings('ignore')
 
-images_file = ''  # the path to the training data
-gt_file = 'Disc_Cup_Mask/'
+images_file = 'E:\\data_set\GAMMA_training data\\training_data\\multi-modality_images'  # the path to the training data
+gt_file = 'E:\\data_set\\GAMMA_training data\\training_data\\Disc_Cup_Mask'
 test_file = ''  # the path to the testing data
 image_size = 256 # the image size to the network (image_size, image_size, 3)
 val_ratio = 0.2  # the ratio of train/validation splitition
 BATCH_SIZE = 8 # batch size
 iters = 3000 # training iteration
 optimizer_type = 'adam' # the optimizer, can be set as SGD, RMSprop,...
-num_workers = 4 # Number of workers used to load data
+num_workers = 0 # Number of workers used to load data
 init_lr = 1e-3 # the initial learning rate
 
 filelists = os.listdir(images_file)
@@ -129,7 +131,7 @@ val_loader = paddle.io.DataLoader(
     use_shared_memory=False
 )
 
-model = cup_disc_UNet(num_classes=3)
+model = AttentionUNet(num_classes=3)
 
 ### The SUMMARY interface provided by the paddlepaddle is called to visualize the constructed model,
 ### which is convenient to view and confirm the model structure and parameter information.
@@ -138,6 +140,6 @@ model = cup_disc_UNet(num_classes=3)
 if optimizer_type == "adam":
     optimizer = paddle.optimizer.Adam(init_lr, parameters=model.parameters())
 
-criterion = nn.CrossEntropyLoss(axis=1)
+criterion = DiceLoss2()
 metric = DiceLoss()
 train(model, iters, train_loader, val_loader, optimizer, criterion, metric, log_interval=50, evl_interval=100)
